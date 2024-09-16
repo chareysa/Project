@@ -17,6 +17,9 @@ export class AngularNodeAppEngine {
 }
 
 // @public
+export function attachNodeErrorHandlers(): void;
+
+// @public
 export class CommonEngine {
     constructor(options?: CommonEngineOptions | undefined);
     render(opts: CommonEngineRenderOptions): Promise<string>;
