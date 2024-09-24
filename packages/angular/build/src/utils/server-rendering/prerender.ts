@@ -160,6 +160,7 @@ export async function prerenderPages(
     outputFilesForWorker,
     assetsReversed,
     appShellOptions,
+    outputMode,
   );
 
   errors.push(...renderingErrors);
@@ -181,6 +182,7 @@ async function renderPages(
   outputFilesForWorker: Record<string, string>,
   assetFilesForWorker: Record<string, string>,
   appShellOptions: AppShellOptions | undefined,
+  outputMode: OutputMode | undefined,
 ): Promise<{
   output: PrerenderOutput;
   errors: string[];
@@ -205,6 +207,8 @@ async function renderPages(
       workspaceRoot,
       outputFiles: outputFilesForWorker,
       assetFiles: assetFilesForWorker,
+      outputMode,
+      hasSsrEntry: !!outputFilesForWorker['/server.mjs'],
     } as RenderWorkerData,
     execArgv: workerExecArgv,
   });
@@ -309,14 +313,16 @@ async function getAllRoutes(
       workspaceRoot,
       outputFiles: outputFilesForWorker,
       assetFiles: assetFilesForWorker,
+      outputMode,
+      hasSsrEntry: !!outputFilesForWorker['/server.mjs'],
     } as RoutesExtractorWorkerData,
     execArgv: workerExecArgv,
   });
 
   try {
-    const { serializedRouteTree, errors }: RoutersExtractorWorkerResult = await renderWorker.run({
-      outputMode,
-    });
+    const { serializedRouteTree, errors }: RoutersExtractorWorkerResult = await renderWorker.run(
+      {},
+    );
 
     return { errors, serializedRouteTree: [...routes, ...serializedRouteTree] };
   } catch (err) {
