@@ -540,7 +540,12 @@ function getEsBuildCommonOptions(options: NormalizedApplicationBuildOptions): Bu
     bundle: true,
     packages: 'bundle',
     assetNames: outputNames.media,
-    conditions: ['es2020', 'es2015', 'module'],
+    conditions: [
+      'es2020',
+      'es2015',
+      'module',
+      optimizationOptions.scripts ? 'production' : 'development',
+    ],
     resolveExtensions: ['.ts', '.tsx', '.mjs', '.js', '.cjs'],
     metafile: true,
     legalComments: options.extractLicenses ? 'none' : 'eof',
@@ -563,7 +568,18 @@ function getEsBuildCommonOptions(options: NormalizedApplicationBuildOptions): Bu
       // Only set to false when script optimizations are enabled. It should not be set to true because
       // Angular turns `ngDevMode` into an object for development debugging purposes when not defined
       // which a constant true value would break.
-      ...(optimizationOptions.scripts ? { 'ngDevMode': 'false' } : undefined),
+      ...(optimizationOptions.scripts
+        ? {
+            'ngDevMode': 'false',
+            'import.meta.env.MODE': '"production"',
+            'import.meta.env.DEV': 'false',
+            'import.meta.env.PROD': 'true',
+          }
+        : {
+            'import.meta.env.MODE': '"development"',
+            'import.meta.env.DEV': 'true',
+            'import.meta.env.PROD': 'false',
+          }),
       'ngJitMode': jit ? 'true' : 'false',
     },
     loader: loaderExtensions,
